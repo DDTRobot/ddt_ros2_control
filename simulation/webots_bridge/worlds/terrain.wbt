@@ -1,0 +1,308 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+
+WorldInfo {
+  basicTimeStep 2
+}
+Viewpoint {
+  orientation -0.34392436048757413 0.5115171428781564 0.7874428530407654 0.9603995278263628
+  position -32.65386242386772 -19.279755897601138 18.74746010215526
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 100 100
+}
+Robot {
+  name "Ros2Supervisor"
+  controller "<extern>"
+  supervisor TRUE
+}
+Solid {
+  translation 1.87 0 0.15
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.141176 0.121569 0.192157
+        }
+      }
+      geometry Box {
+        size 2 4 0.3
+      }
+    }
+  ]
+  boundingObject Shape {
+    appearance Appearance {
+      material Material {
+      }
+    }
+    geometry Box {
+      size 2 4 0.3
+    }
+  }
+}
+Solid {
+  translation 3.87 0 0.5
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.141176 0.121569 0.192157
+        }
+      }
+      geometry Box {
+        size 2 4 0.4
+      }
+    }
+  ]
+  name "solid(1)"
+  boundingObject Shape {
+    appearance Appearance {
+      material Material {
+        diffuseColor 0.141176 0.121569 0.192157
+      }
+    }
+    geometry Box {
+      size 2 4 0.4
+    }
+  }
+}
+Solid {
+  translation 5.87 0 0.95
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.141176 0.121569 0.192157
+        }
+      }
+      geometry Box {
+        size 2 4 0.5
+      }
+    }
+  ]
+  name "solid(2)"
+  boundingObject Shape {
+    appearance Appearance {
+      material Material {
+      }
+    }
+    geometry Box {
+      size 2 4 0.5
+    }
+  }
+}
+Solid {
+  translation 7.87 0 1.5
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.141176 0.121569 0.192157
+        }
+      }
+      geometry Box {
+        size 2 4 0.6
+      }
+    }
+  ]
+  name "solid(3)"
+  boundingObject Shape {
+    appearance Appearance {
+      material Material {
+        diffuseColor 0.141176 0.121569 0.192157
+      }
+    }
+    geometry Box {
+      size 2 4 0.6
+    }
+  }
+}
+Solid {
+  translation -16 0 0
+  children [
+    Group {
+      children [
+        Solid {
+          translation 0 0 0.2
+          children [
+            Shape {
+              appearance Appearance {
+                material Material {
+                  diffuseColor 0.141176 0.121569 0.192157
+                }
+              }
+              geometry Box {
+                size 9.5 9.5 0.2
+              }
+            }
+          ]
+          name "floor_unit(1)"
+          boundingObject Shape {
+            appearance Appearance {
+              material Material {
+                diffuseColor 0.141176 0.121569 0.192157
+              }
+            }
+            geometry Box {
+              size 9.5 9.5 0.2
+            }
+          }
+        }
+        Solid {
+          translation 0 0 0.4
+          children [
+            Shape {
+              appearance Appearance {
+                material Material {
+                  diffuseColor 0.141176 0.121569 0.192157
+                }
+              }
+              geometry Box {
+                size 9 9 0.2
+              }
+            }
+          ]
+          name "floor_unit(2)"
+          boundingObject Box {
+            size 9 9 0.2
+          }
+        }
+        Solid {
+          translation 0 0 0.6
+          children [
+            Shape {
+              appearance Appearance {
+                material Material {
+                  diffuseColor 0.141176 0.121569 0.192157
+                }
+              }
+              geometry Box {
+                size 8.5 8.5 0.2
+              }
+            }
+          ]
+          name "floor_unit(3)"
+          boundingObject Box {
+            size 8.5 8.5 0.2
+          }
+        }
+        Solid {
+          translation 0 0 0.8
+          children [
+            Shape {
+              appearance Appearance {
+                material Material {
+                  diffuseColor 0.141176 0.121569 0.192157
+                }
+              }
+              geometry Box {
+                size 8 8 0.2
+              }
+            }
+          ]
+          name "floor_unit(4)"
+          boundingObject Shape {
+            appearance Appearance {
+              material Material {
+                diffuseColor 0.141176 0.121569 0.192157
+              }
+            }
+            geometry Box {
+              size 8 8 0.2
+            }
+          }
+        }
+        Solid {
+          translation 0 0 1
+          children [
+            Shape {
+              appearance Appearance {
+                material Material {
+                  diffuseColor 0.141176 0.121569 0.192157
+                }
+              }
+              geometry Box {
+                size 7.5 7.5 0.2
+              }
+            }
+          ]
+          name "floor_unit(5)"
+          boundingObject Shape {
+            appearance Appearance {
+              material Material {
+                diffuseColor 0.141176 0.121569 0.192157
+              }
+            }
+            geometry Box {
+              size 7.5 7.5 0.2
+            }
+          }
+        }
+        Solid {
+          translation 0 0 1.2
+          children [
+            Shape {
+              appearance Appearance {
+                material Material {
+                  diffuseColor 0.141176 0.121569 0.192157
+                }
+              }
+              geometry Box {
+                size 7 7 0.2
+              }
+            }
+          ]
+          name "floor_unit(6)"
+          boundingObject Box {
+            size 7 7 0.2
+          }
+        }
+        Solid {
+          translation 0 0 1.4
+          children [
+            Shape {
+              appearance Appearance {
+                material Material {
+                  diffuseColor 0.141176 0.121569 0.192157
+                }
+              }
+              geometry Box {
+                size 6.5 6.5 0.2
+              }
+            }
+          ]
+          name "floor_unit(7)"
+          boundingObject Box {
+            size 6.5 6.5 0.2
+          }
+        }
+        Solid {
+          children [
+            Shape {
+              appearance Appearance {
+                material Material {
+                  diffuseColor 0.141176 0.121569 0.192157
+                }
+              }
+              geometry Box {
+                size 10 10 0.2
+              }
+            }
+          ]
+          name "floor_unit"
+          boundingObject Box {
+            size 10 10 0.2
+          }
+        }
+      ]
+    }
+  ]
+  name "floor"
+}

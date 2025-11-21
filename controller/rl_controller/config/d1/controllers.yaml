@@ -1,0 +1,127 @@
+# This config file is used by ros2_control
+/**:
+  controller_manager:
+    ros__parameters:
+      update_rate: 400  # Hz
+      joint_state_broadcaster:
+        type: joint_state_broadcaster/JointStateBroadcaster
+      imu_sensor_broadcaster:
+        type: imu_sensor_broadcaster/IMUSensorBroadcaster
+      d1_rl_controller:
+        type: rl_controller/RlController
+  
+  imu_sensor_broadcaster:
+    ros__parameters:
+      update_rate: 400  # Hz
+      sensor_name: trunk_imu
+      frame_id:  trunk_imu
+      
+  joint_state_broadcaster:
+    ros__parameters:
+      update_rate: 400  # Hz
+      joints:
+        - FL_hip_joint
+        - FL_thigh_joint
+        - FL_calf_joint
+        - FL_foot_joint
+        - FR_hip_joint
+        - FR_thigh_joint
+        - FR_calf_joint
+        - FR_foot_joint
+        - RL_hip_joint
+        - RL_thigh_joint
+        - RL_calf_joint
+        - RL_foot_joint
+        - RR_hip_joint
+        - RR_thigh_joint
+        - RR_calf_joint
+        - RR_foot_joint
+
+  d1_rl_controller:
+    ros__parameters:
+      update_rate: 400  # Hz
+      joints:
+        - FL_hip_joint
+        - FL_thigh_joint
+        - FL_calf_joint
+        - FL_foot_joint
+        - FR_hip_joint
+        - FR_thigh_joint
+        - FR_calf_joint
+        - FR_foot_joint
+        - RL_hip_joint
+        - RL_thigh_joint
+        - RL_calf_joint
+        - RL_foot_joint
+        - RR_hip_joint
+        - RR_thigh_joint
+        - RR_calf_joint
+        - RR_foot_joint
+
+      command_interfaces:
+        - position
+        - velocity
+        - effort
+        - kp
+        - kd
+      state_interfaces:
+        - position
+        - velocity
+        - effort
+      sensors:
+        - trunk_imu
+
+      # control parameters
+      torque_limit: [80.0, 80.0, 80.0, 20.0, 80.0, 80.0, 80.0, 20.0, 80.0, 80.0, 80.0, 20.0, 80.0, 80.0, 80.0, 20.0]
+      wheel_indices: [3, 7, 11, 15]
+      hip_indices: [0, 4, 8, 12]
+
+      # fsm
+      transform_up:
+        fold_jpos: [0.0, 1.0, -2.4, 0.0, -0.0, 1.0, -2.4, 0.0, 0.0, 1.6, -2.4, 0.0, -0.0, 1.6, -2.4, 0.0]
+        stand_jpos: [0.0, 0.8, -1.6, 0.0, -0.0, 0.8, -1.6, 0.0, 0.0, 1.0, -1.6, 0.0, -0.0, 1.0, -1.6, 0.0]
+        fold_timer: 2.0
+        stand_timer: 2.0
+        # 
+        ff_torque: [-0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 5.0, 0.0, -0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 5.0, 0.0]
+        joint_kp: [400.0, 150.0, 300.0, 5.0, 400.0, 150.0, 300.0, 5.0, 400.0, 150.0, 300.0, 5.0, 400.0, 150.0, 300.0, 5.0]
+        joint_kd: [8.0, 8.0, 8.0, 0.5, 8.0, 8.0, 8.0, 0.5, 8.0, 8.0, 8.0, 0.5, 8.0, 8.0, 8.0, 0.5]
+        
+      transform_down:
+        fold_jpos: [0.3, 1.20, -2.7, 0.0, -0.3, 1.2, -2.7, 0.0, 0.3, 1.20, -2.7, 0.0, -0.3, 1.2, -2.7, 0.0]
+        fold_timer: 3.0
+        joint_kp: [300.0, 150.0, 300.0, 5.0, 300.0, 150.0, 300.0, 5.0, 300.0, 150.0, 300.0, 5.0, 300.0, 150.0, 300.0, 5.0]
+        joint_kd: [4.0, 8.0, 8.0, 0.2, 4.0, 8.0, 8.0, 0.2, 4.0, 8.0, 8.0, 0.2, 4.0, 8.0, 8.0, 0.2]
+
+      joint_pd:
+        joint_kp: [400.0, 500.0, 500.0, 0.0, 400.0, 500.0, 500.0, 0.0, 400.0, 500.0, 500.0, 0.0, 400.0, 500.0, 500.0, 0.0]
+        joint_kd: [8.0, 8.0, 8.0, 0.8, 8.0, 8.0, 8.0, 0.8, 8.0, 8.0, 8.0, 0.8, 8.0, 8.0, 8.0, 0.8]
+
+      rl_policy_names:
+        - "rl_flat"
+         
+      rl_flat:
+        policy_path: config/d1/flat.onnx
+        output_name: "nn_output"
+        # env
+        num_obs: 57
+        num_actions: 16
+        history_len: 10
+        observations_name: ["ang_vel", "gravity", "commands", "dof_pos", "dof_vel", "last_actions"]
+        commands_name: ["lin_vel_x", "lin_vel_y", "ang_vel_z"]
+        commands_scale: [2.0, 2.0, 0.25] # lin_vel_scale, lin_vel_scale, ang_vel_scale
+        max_commands: [3.0, 1.0, 1.0]
+        min_commands: [-3.0, -1.0, -1.0]
+        commands_comp: [0.0, 0.0, 0.0] # direct add offset to command
+        # control parameters
+        time_interval: 0.02 # forward thread seconds
+        default_joint_angles: [0.1, 0.8, -1.5, 0.0, -0.1, 0.8, -1.5, 0.0, 0.1, 1.0, -1.5, 0.0, -0.1, 1.0, -1.5, 0.0]
+        joint_kp: [100.0, 60.0, 60.0, 10.0, 100.0, 60.0, 60.0, 10.0, 100.0, 60.0, 60.0, 10.0, 100.0, 60.0, 60.0, 10.0]
+        joint_kd: [4.0, 1.5, 1.5, 0.5, 4.0, 1.5, 1.5, 0.5, 4.0, 1.5, 1.5, 0.5, 4.0, 1.5, 1.5, 0.5]
+
+        action_scales: [ 0.125, 0.25, 0.25, 0.25, 0.125, 0.25, 0.25, 0.25, 0.125, 0.25, 0.25, 0.25, 0.125, 0.25, 0.25, 0.25 ]
+
+        lin_vel_scale: 2.0
+        ang_vel_scale: 0.25
+        dof_pos_scale: 1.0
+        dof_vel_scale: 0.05

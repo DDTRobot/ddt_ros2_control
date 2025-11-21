@@ -1,0 +1,10 @@
+<library path="gazebo_bridge">
+  <class
+    name="usr_gazebo_ros2_control/GazeboBridge"
+    type="usr_gazebo_ros2_control::GazeboBridge"
+    base_class_type="gazebo_ros2_control::GazeboSystemInterface">
+    <description>
+      The robot simulation interface which constructs joint handles from an SDF/URDF.
+    </description>
+  </class>
+</library>

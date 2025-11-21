@@ -1,0 +1,10 @@
+<library path="rl_controller">
+  <class 
+    name="rl_controller/RlController" 
+    type="rl_controller::RlController" 
+    base_class_type="controller_interface::ControllerInterface">
+  <description>
+    DDT robot rl controller interface
+  </description>
+  </class>
+</library>

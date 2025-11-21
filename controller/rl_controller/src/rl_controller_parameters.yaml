@@ -1,0 +1,15 @@
+rl_controller:
+  update_rate:
+    {
+      type: int,
+      default_value: 500,
+      description: "Main control loop update rate in Hz",
+    }
+  joints:
+    {
+      type: string_array,
+      default_value: [],
+      description: "Joint names to control and listen to",
+      read_only: true,
+      validation: { unique<>: null },
+    }

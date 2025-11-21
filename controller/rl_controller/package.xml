@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>rl_controller</name>
+  <version>0.0.0</version>
+  <description>Reinforcement learning control frame of DDT robot</description>
+  <maintainer email="liukexin@directdrivetech.com">lkx</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake_auto</buildtool_depend>
+  
+  <depend>rclcpp</depend>
+  <depend>pluginlib</depend>
+  <depend>hardware_interface</depend>
+  <depend>controller_interface</depend>
+  <depend>controller_manager</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+
+  <depend>generate_parameter_library</depend>
+  <depend>Eigen3</depend>
+  <depend>eigen3_cmake_module</depend>
+  
+  <depend>ros_utils</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_cmake_clang_format</test_depend>
+  <test_depend>ament_cmake_copyright</test_depend>
+  <test_depend>ament_cmake_cppcheck</test_depend>
+  <test_depend>ament_cmake_cpplint</test_depend>
+  <test_depend>ament_cmake_lint_cmake</test_depend>
+  <test_depend>ament_cmake_xmllint</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

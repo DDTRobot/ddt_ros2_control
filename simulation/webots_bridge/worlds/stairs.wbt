@@ -1,0 +1,93 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/stairs/protos/StraightStairs.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/stairs/protos/StraightStairsLanding.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/obstacles/protos/Ramp30deg.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/factory/containers/protos/WoodenBox.proto"
+
+WorldInfo {
+  basicTimeStep 2
+}
+Viewpoint {
+  orientation -0.31413672541399396 0.3301347310003033 0.8901287418871106 1.1708456672184313
+  position -3.081213461946978 -12.467330544648238 6.127070773892354
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 100 100
+}
+Solid {
+  translation 1 -5 0.15
+  children [
+    WoodenBox {
+      translation 1 0 0.2
+      name "wooden box(1)"
+      size 1 2 0.7
+    }
+    WoodenBox {
+      translation 5.01 0 0.2
+      name "wooden box(5)"
+      size 1 2 0.7
+    }
+    WoodenBox {
+      translation 2 0 0.45
+      name "wooden box(2)"
+      size 1 2 1.2
+    }
+    WoodenBox {
+      translation 4 0 0.45
+      name "wooden box(4)"
+      size 1 2 1.2
+    }
+    WoodenBox {
+      translation 3 0 0.75
+      name "wooden box(3)"
+      size 1 2 1.8
+    }
+    WoodenBox {
+      translation 0 0 0
+      size 1 2 0.3
+    }
+    WoodenBox {
+      translation 6.01 0 0
+      name "wooden box(6)"
+      size 1 2 0.3
+    }
+  ]
+  name "high_plane"
+}
+Robot {
+  name "Ros2Supervisor"
+  controller "<extern>"
+  supervisor TRUE
+}
+StraightStairs {
+  translation 0.8 0 0
+  stepSize 0.31 1.27 0.23
+  nSteps 6
+  leftRail []
+  rightRail []
+}
+Ramp30deg {
+  translation 3.49 -2.4 0
+}
+StraightStairs {
+  translation 6.72 -9.2876e-07 0
+  rotation 0 0 1 3.14159
+  name "straight stairs(1)"
+  stepSize 0.31 1.27 0.23
+  nSteps 6
+  leftRail []
+  rightRail []
+}
+StraightStairsLanding {
+  translation 3.76 0 0
+  landingSize 2.5 1.27 0.03
+  height 0.9
+}

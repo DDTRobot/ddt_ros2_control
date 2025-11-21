@@ -1,0 +1,15 @@
+# This config file is used by ros2_control
+/**:
+  controller_manager:
+    ros__parameters:
+      update_rate: 500 # Hz
+      joint_state_broadcaster:
+        type: joint_state_broadcaster/JointStateBroadcaster
+      imu_sensor_broadcaster:
+        type: imu_sensor_broadcaster/IMUSensorBroadcaster
+
+  imu_sensor_broadcaster:
+    ros__parameters:
+      update_rate: 500 # Hz
+      sensor_name: trunk_imu
+      frame_id: trunk_imu

@@ -1,0 +1,6 @@
+<library path="mujoco_ros2_control-system">
+    <class type="mujoco_ros2_control::MujocoRos2ControlPlugin"
+           base_class_type="mujoco_sim_ros2::MujocoPhysicsPlugin">
+        <description>Mujoco ros2 control plugin</description>
+    </class>
+</library>

@@ -1,0 +1,78 @@
+teleop_command:
+  update_rate: {
+      type: int,
+      default_value: 10,
+      description: "Main control loop update rate in Hz",
+  }
+  joystick_axes_size: {
+    type: int,
+    default_value: 8,
+    description: "Joystick axes size",
+    # validation: { bounds<>: [0.0, 10.0] },
+  }
+
+  joystick_buttons_size: {
+    type: int,
+    default_value: 8,
+    description: "Joystick buttons size",
+    # validation: { bounds<>: [0.0, 10.0] },
+  } 
+   
+  joystick_deadzone: {
+    type: double,
+    default_value: 0.013,
+    description: "Dead zone for joystick input",
+    validation: { bounds<>: [0.0, 1.0] },
+  }
+  speed_ratio: {
+    type: double_array,
+    default_value: [0.25, 0.5, 1.0],
+    description: "Speed ratio for joystick input",
+    validation: { fixed_size<>: [3] },
+  }
+  max_twist_linear: {
+    type: double,
+    default_value: 3,
+    description: "Max linear velocity of command input, m/s",
+    validation: { bounds<>: [0.0, 10.0] },
+  }
+  max_twist_angular: {
+    type: double,
+    default_value: 6,
+    description: "Max angular velocity of command input, rad/s",
+    validation: { bounds<>: [0.0, 10.0] },
+  }
+  max_roll: {
+    type: double,
+    default_value: 0.2,
+    description: "Max pose of command input(not use)",
+    validation: { bounds<>: [0.0, 10.0] },
+  }
+  max_pitch: {
+    type: double,
+    default_value: 0.2,
+    description: "Max pose of command input(not use)",
+    validation: { bounds<>: [0.0, 10.0] },
+  }
+  position_ratio: {
+    type: double,
+    default_value: 0.2,
+    description: "Max position speed of command input",
+    validation: { bounds<>: [0.0, 10.0] },
+  }
+  position_z_limits: {
+    type: double_array,
+    default_value: [0.15, 0.4],
+    description: "Position z range in meters",
+    validation: { fixed_size<>: [2] },
+  }
+  uart_interface: {
+      type: string,
+      default_value: "/dev/ttyTHS1",
+      description: "Network interface name",
+  }
+  use_sdk: {
+    type: bool,
+    default_value: false,
+    description: "Use SDK for robot",
+  }

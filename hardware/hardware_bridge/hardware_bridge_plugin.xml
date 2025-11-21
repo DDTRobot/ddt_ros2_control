@@ -1,0 +1,9 @@
+<library path="hardware_bridge">
+  <class 
+    type="tita_locomotion::HardwareBridge" 
+    base_class_type="hardware_interface::SystemInterface">
+    <description>
+      This is tita control bridge plugin
+    </description>
+  </class>
+</library>

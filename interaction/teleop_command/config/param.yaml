@@ -1,0 +1,12 @@
+/**:
+  teleop_command:
+    ros__parameters:
+      uart_interface: /dev/ttyTHS1
+      update_rate: 10 # Hz
+      use_sdk: false
+      joystick_deadzone: 0.013
+      speed_ratio: [0.33, 0.66, 1.0]
+      max_twist_linear: 3.0
+      max_twist_angular: 6.0
+      max_roll: 0.2
+      max_pitch: 0.4
