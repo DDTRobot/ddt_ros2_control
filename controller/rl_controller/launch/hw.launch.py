@@ -7,14 +7,11 @@ from launch.actions import OpaqueFunction, DeclareLaunchArgument
 import xacro
 import sys
 
-sys.path.insert(0, os.path.join(get_package_share_directory("tita_bringup"), "launch"))
-from launch_utils import tita_namespace
-
 
 def launch_setup(context, *args, **kwargs):
     robot_name = LaunchConfiguration("robot").perform(context)
     # nn = LaunchConfiguration("namespace").perform(context)
-    nn = tita_namespace
+    nn = ""
 
     robot_xacro_path = os.path.join(
         get_package_share_directory(robot_name + "_description"),
