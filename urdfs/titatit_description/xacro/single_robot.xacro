@@ -1,0 +1,265 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="single_robot">
+  <xacro:macro name="single_robot" params="name x_offset z_rotation">
+    <link name="${name}_base_link">
+      <inertial>
+        <origin xyz="0.01335116 3.5457E-06 0.01863129" rpy="0 0 0" />
+        <mass value="11.36226789" />
+        <inertia ixx="0.10777013" ixy="-0.00184576" ixz="0.01392083" iyy="0.25823486" iyz="-1.0712E-4" izz="0.3122104" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://tita_description/meshes/base_link.STL" />
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0.0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.47 0.3 0.19" />
+          <!-- <mesh filename="package://tita_description/collision/base_link1.stl" /> -->
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${name}_base_joint" type="fixed">
+      <origin xyz="${x_offset} 0 0" rpy="0 0 ${z_rotation}" />
+      <parent link="base_link" />
+      <child link="${name}_base_link" />
+    </joint>
+
+    <link name="${name}_spad">
+    </link>
+    <joint name="${name}_spad" type="fixed">
+      <origin xyz="0.24052 -0.0019 0.064455" rpy="2.199 0 1.5708" />
+      <parent link="${name}_base_link" />
+      <child link="${name}_spad" />
+      <axis xyz="0 0 0" />
+    </joint>
+    <link name="${name}_spad1">
+    </link>
+    <joint name="${name}_spad1" type="fixed">
+      <origin xyz="0.21953 -0.0019 -0.030142" rpy="2.632 0 1.5708" />
+      <parent link="${name}_base_link" />
+      <child link="${name}_spad1" />
+      <axis xyz="0 0 0" />
+    </joint>
+    <link name="${name}_left_camera">
+    </link>
+    <joint name="${name}_left_camera" type="fixed">
+      <origin xyz="0.23416 0.075 0.04036" rpy="1.5708 0 1.5708" />
+      <parent link="${name}_base_link" />
+      <child link="${name}_left_camera" />
+      <axis xyz="0 0 0" />
+    </joint>
+    <link name="${name}_ch201">
+    </link>
+    <joint name="${name}_ch201" type="fixed">
+      <origin xyz="0.23782 0 0.018636" rpy="1.1693 0 1.5708" />
+      <parent link="base_link" />
+      <child link="${name}_ch201" />
+      <axis xyz="0 0 0" />
+    </joint>
+    <link name="${name}_right_camara">
+    </link>
+    <joint name="${name}_right_camera" type="fixed">
+      <origin xyz="0.23416 -0.075001 0.04036" rpy="1.5708 0 1.5708" />
+      <parent link="${name}_base_link" />
+      <child link="${name}_right_camara" />
+      <axis xyz="0 0 0" />
+    </joint>
+
+    <link name="${name}_left_leg_1">
+      <inertial>
+        <origin xyz="0.001602 0.000050 0.000638" rpy="0 0 0" />
+        <mass value="2.064" />
+        <inertia ixx="0.004370" ixy="0.000001" ixz="0.000055" iyy="0.004060" iyz="-0.000001" izz="0.003268" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://tita_description/meshes/left_leg_1.STL" />
+        </geometry>
+        <material name="black"/>
+      </visual>
+    </link>
+    <joint name="${name}_joint_left_leg_1" type="revolute">
+      <origin xyz="0 0.0895 0" rpy="1.5708 0 1.5708" />
+      <parent link="${name}_base_link" />
+      <child link="${name}_left_leg_1" />
+      <axis xyz="0 0 1" />
+      <limit lower="-0.785398" upper="0.785398" effort="80" velocity="15" />
+    </joint>
+    <link name="${name}_left_leg_2">
+      <inertial>
+        <origin xyz="0.021183 0.000354 -0.028971" rpy="0 0 0" />
+        <mass value="3.018005" />
+        <inertia ixx="0.005749" ixy="-0.000167" ixz="-0.001863" iyy="0.014415" iyz="-0.000122" izz="0.013964" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://tita_description/meshes/left_leg_2.STL" />
+        </geometry>
+        <material name="black"/>
+      </visual>
+    </link>
+    <joint name="${name}_joint_left_leg_2" type="revolute">
+      <origin xyz="0.1426 0 0" rpy="-1.5708 0 -1.5708" />
+      <parent link="${name}_left_leg_1" />
+      <child link="${name}_left_leg_2" />
+      <axis xyz="0 0 1" />
+      <limit lower="-1.919862" upper="3.490659" effort="80" velocity="15" />
+    </joint>
+    <link name="${name}_left_leg_3">
+      <inertial>
+        <origin xyz="0.095348 0.011698 0.001838" rpy="0 0 0" />
+        <mass value="0.57244" />
+        <inertia ixx="0.000363" ixy="0.000237" ixz="-0.000109" iyy="0.004094" iyz="0.000017" izz="0.004292" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://tita_description/meshes/left_leg_3.STL" />
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin xyz="0.1 0.021 -0.002" rpy="0 0 -0.131" />
+        <geometry>
+          <box size="0.2 0.07 0.05" />
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${name}_joint_left_leg_3" type="revolute">
+      <origin xyz="0.2 0 0" rpy="0 0 0" />
+      <parent link="${name}_left_leg_2" />
+      <child link="${name}_left_leg_3" />
+      <axis xyz="0 0 1" />
+      <limit lower="-2.670354" upper="-0.698132" effort="80" velocity="15" />
+    </joint>
+    <link name="${name}_left_leg_4">
+      <inertial>
+        <origin xyz="-2.267E-06 -1.6471E-06 -0.00095616" rpy="0 0 0" />
+        <mass value="1.5094" />
+        <inertia ixx="0.003615" ixy="6.9816E-06" ixz="-2.3224E-07" iyy="0.003574" iyz="-1.7712E-08" izz="0.006905" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://tita_description/meshes/left_leg_4.STL" />
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <cylinder radius="0.0925" length="0.034" />
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${name}_joint_left_leg_4" type="revolute">
+      <origin xyz="0.2 0 0.0514" rpy="0 0 0" />
+      <parent link="${name}_left_leg_3" />
+      <child link="${name}_left_leg_4" />
+      <axis xyz="0 0 1" />
+      <limit lower="-6.283185e4" upper="6.283185e4" effort="20" velocity="50" />
+    </joint>
+    <link name="${name}_right_leg_1">
+      <inertial>
+        <origin xyz="-0.001602 0.000050 0.000638" rpy="0 0 0" />
+        <mass value="2.064" />
+        <inertia ixx="0.004370" ixy="-0.000001" ixz="-0.000055" iyy="0.004060" iyz="-0.000001" izz="0.003268" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://tita_description/meshes/right_leg_1.STL" />
+        </geometry>
+        <material name="black"/>
+      </visual>
+    </link>
+    <joint name="${name}_joint_right_leg_1" type="revolute">
+      <origin xyz="0 -0.0895 0" rpy="1.5708 0 1.5708" />
+      <parent link="${name}_base_link" />
+      <child link="${name}_right_leg_1" />
+      <axis xyz="0 0 1" />
+      <limit lower="-0.785398" upper="0.785398" effort="80" velocity="15" />
+    </joint>
+    <link name="${name}_right_leg_2">
+      <inertial>
+        <origin xyz="0.021183 0.000354 0.028971" rpy="0 0 0" />
+        <mass value="3.018005" />
+        <inertia ixx="0.005749" ixy="-0.000167" ixz="0.001863" iyy="0.014415" iyz="0.000122" izz="0.013964" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://tita_description/meshes/right_leg_2.STL" />
+        </geometry>
+        <material name="black"/>
+      </visual>
+    </link>
+    <joint name="${name}_joint_right_leg_2" type="revolute">
+      <origin xyz="-0.1426 0 0" rpy="-1.5708 0 -1.5708" />
+      <parent link="${name}_right_leg_1" />
+      <child link="${name}_right_leg_2" />
+      <axis xyz="0 0 1" />
+      <limit lower="-1.919862" upper="3.490659" effort="80" velocity="15" />
+    </joint>
+    <link name="${name}_right_leg_3">
+      <inertial>
+        <origin xyz="0.095348 0.011698 -0.001838" rpy="0 0 0" />
+        <mass value="0.57244" />
+        <inertia ixx="0.000363" ixy="0.000237" ixz="0.000109" iyy="0.004094" iyz="-0.000017" izz="0.004292" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://tita_description/meshes/right_leg_3.STL" />
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin xyz="0.1 0.021 -0.002" rpy="0 0 -0.131" />
+        <geometry>
+          <box size="0.2 0.07 0.05" />
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${name}_joint_right_leg_3" type="revolute">
+      <origin xyz="0.2 0 0" rpy="0 0 0" />
+      <parent link="${name}_right_leg_2" />
+      <child link="${name}_right_leg_3" />
+      <axis xyz="0 0 1" />
+      <limit lower="-2.670354" upper="-0.698132" effort="80" velocity="15" />
+    </joint>
+    <link name="${name}_right_leg_4">
+      <inertial>
+        <origin xyz="-2.3798E-06 -1.5854E-06 0.00095595" rpy="0 0 0" />
+        <mass value="1.5094" />
+        <inertia ixx="0.003615" ixy="7.0548E-06" ixz="2.3146E-07" iyy="0.003574" iyz="1.9287E-08" izz="0.006905" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://tita_description/meshes/right_leg_4.STL" />
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <cylinder radius="0.0925" length="0.034" />
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${name}_joint_right_leg_4" type="revolute">
+      <origin xyz="0.2 0 -0.0514" rpy="0 0 0" />
+      <parent link="${name}_right_leg_3" />
+      <child link="${name}_right_leg_4" />
+      <axis xyz="0 0 1" />
+      <limit lower="-6.283185e4" upper="6.283185e4" effort="20" velocity="50" />
+    </joint>
+  </xacro:macro>
+</robot>

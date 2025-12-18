@@ -216,7 +216,9 @@ void FSMState_RL::update_observations()
   DVec<tensor_element_t> pos = obs_.dof_pos - d2f(vectorToEigen(rl_params_->default_joint_angles));
   DVec<tensor_element_t> vel = obs_.dof_vel;
   pos = reindex(pos);
+  pos = re_sign(pos);
   vel = reindex(vel);
+  vel = re_sign(vel);
   std::vector<DVec<tensor_element_t>> observations;
   for (size_t i = 0; i < rl_params_->observations_name.size(); i++) {
     if (rl_params_->observations_name[i] == "ang_vel") {
@@ -280,6 +282,7 @@ void FSMState_RL::update_forward()
       action_vec_ = vectorToEigen(inferrer_->computeActions(input_datas));
       obs_.last_actions = action_vec_;
       action_vec_ = reindex(action_vec_);
+      action_vec_ = re_sign(action_vec_);
       obs_history_vec_.head(obs_history_vec_.size() - obs_vec_.size()) =
         obs_history_vec_.tail(obs_history_vec_.size() - obs_vec_.size());
       obs_history_vec_.tail(obs_vec_.size()) = obs_vec_;

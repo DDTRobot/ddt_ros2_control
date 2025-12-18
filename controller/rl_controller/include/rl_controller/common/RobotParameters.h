@@ -91,6 +91,7 @@ struct RLParameters
   // scalar_t lin_vel_x_comp{0}, ang_vel_z_comp{0};
   scalar_t output_torque_scale{1.0};
   std::vector<long int> reindex;
+  std::vector<scalar_t> re_sign;
   // scalar_t max_lin_vel_x{1.0}, max_lin_vel_y{1.0}, max_ang_vel_z{1.0};
 };
 struct RobotControlParameters

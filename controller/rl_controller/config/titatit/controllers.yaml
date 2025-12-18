@@ -1,0 +1,114 @@
+# This config file is used by ros2_control
+/**:
+  controller_manager:
+    ros__parameters:
+      update_rate: 500  # Hz
+      # is_async: true
+          
+      joint_state_broadcaster:
+        type: joint_state_broadcaster/JointStateBroadcaster
+      imu_sensor_broadcaster:
+        type: imu_sensor_broadcaster/IMUSensorBroadcaster
+      titatit_rl_controller:
+        type: rl_controller/RlController
+  
+  imu_sensor_broadcaster:
+    ros__parameters:
+      update_rate: 500  # Hz
+      sensor_name: trunk_imu
+      frame_id:  trunk_imu
+  joint_state_broadcaster:
+    ros__parameters:
+      update_rate: 500  # Hz
+
+  titatit_rl_controller:
+    ros__parameters:
+      update_rate: 500  # Hz
+      joints:
+        - F_joint_left_leg_1
+        - F_joint_left_leg_2
+        - F_joint_left_leg_3
+        - F_joint_left_leg_4
+        - F_joint_right_leg_1
+        - F_joint_right_leg_2
+        - F_joint_right_leg_3
+        - F_joint_right_leg_4
+        - R_joint_left_leg_1
+        - R_joint_left_leg_2
+        - R_joint_left_leg_3
+        - R_joint_left_leg_4
+        - R_joint_right_leg_1
+        - R_joint_right_leg_2
+        - R_joint_right_leg_3
+        - R_joint_right_leg_4
+      command_interfaces:
+        - position
+        - velocity
+        - effort
+        - kp
+        - kd
+      state_interfaces:
+        - position
+        - velocity
+        - effort
+      sensors:
+        - trunk_imu
+      
+      # control parameters
+      torque_limit: [60.0, 60.0, 60.0, 20.0, 60.0, 60.0, 60.0, 20.0, 60.0, 60.0, 60.0, 20.0, 60.0, 60.0, 60.0, 20.0]
+      wheel_indices: [3, 7, 11, 15]
+      hip_indices: [0, 4, 8, 12]
+
+      # fsm
+
+      transform_up:
+        fold_jpos: [0.75, 1.20, -2.7, 0.0, -0.75, 1.2, -2.7, 0.0, 0.75, 1.20, -2.7, 0.0, -0.75, 1.2, -2.7, 0.0]
+        stand_jpos: [-0.05, 0.9, -2.6, 0.0, 0.05, 0.90, -2.6, 0.0, -0.05, 0.9, -2.6, 0.0, 0.05, 0.90, -2.6, 0.0]
+        fold_timer: 4.0
+        stand_timer: 2.0
+        # 
+        ff_torque: [-20.0, 0.0, -25.0, 0.0, 20.0, 0.0, -25.0, 0.0, -20.0, 0.0, -25.0, 0.0, 20.0, 0.0, -25.0, 0.0]
+        joint_kp: [600.0, 80.0, 80.0, 5.0, 600.0, 80.0, 80.0, 5.0, 600.0, 80.0, 80.0, 5.0, 600.0, 80.0, 80.0, 5.0]
+        joint_kd: [8.0, 8.0, 8.0, 0.5, 8.0, 8.0, 8.0, 0.5, 8.0, 8.0, 8.0, 0.5, 8.0, 8.0, 8.0, 0.5]
+        
+      transform_down:
+        fold_jpos: [0.5, 1.20, -2.7, 0.0, -0.5, 1.2, -2.7, 0.0, 0.5, 1.20, -2.7, 0.0, -0.5, 1.2, -2.7, 0.0]
+        fold_timer: 4.0
+        joint_kp: [600.0, 80.0, 80.0, 5.0, 600.0, 80.0, 80.0, 5.0, 600.0, 80.0, 80.0, 5.0, 600.0, 80.0, 80.0, 5.0]
+        joint_kd: [8.0, 8.0, 8.0, 0.2, 8.0, 8.0, 8.0, 0.2, 8.0, 8.0, 8.0, 0.2, 8.0, 8.0, 8.0, 0.2]
+        
+      joint_pd:
+        joint_kp: [600.0, 80.0, 80.0, 5.0, 600.0, 80.0, 80.0, 5.0, 600.0, 80.0, 80.0, 5.0, 600.0, 80.0, 80.0, 5.0]
+        joint_kd: [8.0, 8.0, 8.0, 0.2, 8.0, 8.0, 8.0, 0.2, 8.0, 8.0, 8.0, 0.2, 8.0, 8.0, 8.0, 0.2]
+      rl_policy_names:
+        - "rl_flat"
+         
+      rl_flat:
+        policy_path: config/titatit/test_cylinder_1027_open_source.onnx
+        output_name: "79"
+        policy_type: "np3o"
+        # env
+        num_obs: 57
+        num_actions: 16
+        history_len: 10
+        observations_name: ["ang_vel", "gravity", "commands", "dof_pos", "dof_vel", "last_actions"]
+        commands_name: ["lin_vel_x", "lin_vel_y", "ang_vel_z"]
+        commands_scale: [2.0, 2.0, 0.25] # lin_vel_scale, lin_vel_scale, ang_vel_scale
+        max_commands: [1.0, 1.0, 1.0]
+        min_commands: [-1.0, -1.0, -1.0]
+        commands_comp: [0.0, 0.0, 0.0] # direct add offset to command
+        # control parameters
+        time_interval: 0.02 # forward thread seconds
+        default_joint_angles: [0.1, 0.8, -1.5, 0.0, -0.1, 0.8, -1.5, 0.0, 0.1, 1.0, -1.5, 0.0, -0.1, 1.0, -1.5, 0.0]
+        joint_kp: [60.0, 60.0, 60.0, 10.0, 60.0, 60.0, 60.0, 10.0, 60.0, 60.0, 60.0, 10.0, 60.0, 60.0, 60.0, 10.0]
+        joint_kd: [1.5, 1.5, 1.5, 0.5, 1.5, 1.5, 1.5, 0.5, 1.5, 1.5, 1.5, 0.5, 1.5, 1.5, 1.5, 0.5]
+
+        action_scales: [ 0.125, 0.25, 0.25, 0.25, 0.125, 0.25, 0.25, 0.25, 0.125, 0.25, 0.25, 0.25, 0.125, 0.25, 0.25, 0.25 ]
+
+        lin_vel_scale: 2.0
+        ang_vel_scale: 0.25
+        dof_pos_scale: 1.0
+        dof_vel_scale: 0.05
+
+        reindex: [4, 5, 6, 7, 0, 1, 2, 3, 8, 9, 10, 11, 12, 13, 14, 15]
+        re_sign: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]

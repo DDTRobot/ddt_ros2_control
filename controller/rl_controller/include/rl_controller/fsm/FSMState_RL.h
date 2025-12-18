@@ -96,6 +96,19 @@ protected:
     }
   };
 
+  DVec<tensor_element_t> re_sign(DVec<tensor_element_t> & vec)
+  {
+    if (rl_params_->re_sign.empty()) {
+      return vec;
+    } else {
+      DVec<tensor_element_t> vec_re_sign = vec;
+      for (auto i = 0UL; i < rl_params_->re_sign.size(); i++) {
+        vec_re_sign[i] = rl_params_->re_sign[i] * vec[i];
+      }
+      return vec_re_sign;
+    }
+  };
+
   RLParameters * rl_params_;
   Observations obs_;
 
