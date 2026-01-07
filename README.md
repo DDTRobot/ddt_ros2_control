@@ -1,4 +1,4 @@
-# DDT 机器人 sim2sim/sim2real如果想要
+# DDT 机器人 sim2sim/sim2real
 本仓库是一个基于 ROS 2 的多包工作空间，包含机器人控制器、硬件桥接、仿真桥接（`Mujoco` / `Gazebo` / `Webots`）、交互控制以及机器人模型描述。控制器支持基于有限状态机的策略，并可加载 ONNX 强化学习模型进行推理。
 同时提供 [Docker 镜像与启动说明](./docker/README.md)，将依赖与配置固化为可复现环境，便于快速部署、复现实验与跨设备一致运行（sim2sim）。
 
