@@ -51,6 +51,7 @@
         </xacro:if>
         <xacro:if value="${hw_env == 'hw'}">
           <plugin>tita_locomotion::HardwareBridge</plugin>
+          <param name="pvt_ctrl">false</param>
         </xacro:if>
       </hardware>
 

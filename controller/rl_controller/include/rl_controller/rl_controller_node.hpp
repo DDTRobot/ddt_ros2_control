@@ -29,7 +29,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
-#include "rl_controller/rl_controller_parameters.hpp"
+#include "rl_controller_parameters.hpp"
 #include "ros_utils/topic_names.hpp"
 #include "semantic_components/imu_sensor.hpp"
 #include "sensor_msgs/msg/imu.hpp"
