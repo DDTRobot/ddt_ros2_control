@@ -91,6 +91,7 @@ sudo apt install python3-colcon-common-extensions
 colcon build --symlink-install --packages-up-to rl_controller hardware_bridge
 ```
 
+
 - 启动控制器（硬件环境）：
 在启动有硬件环境的机器上，需要手动关闭已经启动的运控服务：
 ```bash
@@ -98,6 +99,12 @@ sudo systemctl stop joy_controller.service
 sudo systemctl stop rl8_controller.service
 sudo systemctl stop rl16_controller.service
 ```
+
+**如果运行在TITA上，需要注意：**
+
+TITA上电后运控板默认进入Ready Mode，需要运行此[start.bash](./start.bash)，让运控板进入 Direct mode
+
+
 确保无其他ros2节点在运行，然后启动硬件运控服务：
 ```bash
 ros2 launch rl_controller hw.launch.py robot:=d1
@@ -138,6 +145,13 @@ export WEBOTS_HOME=/usr/lib/webots
 - Mujoco 未找到：确认 `mujoco` 已安装并设置 `MUJOCO_DIR`
 - 控制器未加载：检查 `controller_manager` 日志与 `controllers.yaml` 配置。  
 - 模型描述加载失败：确认 `robot:=<name>` 与对应 `*_description` 包存在且可用
+- 如果在TITA上遇到如下编译问题，可以尝试把代码中黄框部分去掉
+![bug1](/docker/bug1.png)
+
+```
+#include "rl_controller/rl_controller_parameters.hpp"
+改成#include "rl_controller_parameters.hpp"
+```
 
 ## 许可证
 各子包的许可证可能不同，请参考对应 `package.xml` 中的 `license` 字段。
