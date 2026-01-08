@@ -41,7 +41,7 @@ struct Joint
   double velocity = 0.0f;
   double effort = 0.0f;
   double errorId = 0.0f;
-  
+
   double effortCommand = 0.0f;
   double positionCommand = 0.0f;
   double velocityCommand = 0.0f;
@@ -87,7 +87,7 @@ private:
 private:
   std::unique_ptr<tita_robot> robot_;
   rclcpp::Clock clock_{RCL_SYSTEM_TIME};
-  bool cannot_write_ = false;
+  bool pvt_ctrl_{true};
 };
 }  // namespace tita_locomotion
 

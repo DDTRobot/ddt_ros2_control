@@ -45,7 +45,9 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
   // node_ = rclcpp::Node::make_shared("hardware_bridge_node");
   // executor_.add_node(node_);
   // std::thread([this]() { executor_.spin(); }).detach();
-
+  auto ctrl_mode = info_.hardware_parameters["pvt_ctrl"];
+  pvt_ctrl_ = ctrl_mode.compare("false") == 0 ? false : true;
+  RCLCPP_INFO(rclcpp::get_logger("hardware_bridge"), "Using PVT control: %d", pvt_ctrl_);
   for (hardware_interface::ComponentInfo component : info.joints) {
     Joint joint;
     joint.name = component.name;
@@ -186,7 +188,7 @@ hardware_interface::return_type HardwareBridge::read(
 hardware_interface::return_type HardwareBridge::write(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
-  std::vector<double> kp, kd, p, v, t;
+  std::vector<double> kp, kd, p, v, t, only_ts;
   for (size_t id = 0; id < mJoints.size(); id++) {
     kp.push_back(mJoints[id].kp);
     kd.push_back(mJoints[id].kd);
@@ -196,11 +198,21 @@ hardware_interface::return_type HardwareBridge::write(
     p.push_back(mJoints[id].positionCommand);
     v.push_back(mJoints[id].velocityCommand);
     t.push_back(mJoints[id].effortCommand);
+    auto only_t = mJoints[id].effortCommand +
+                  mJoints[id].kp * (mJoints[id].positionCommand - mJoints[id].position) +
+                  mJoints[id].kd * (mJoints[id].velocityCommand - mJoints[id].velocity);
+    only_ts.push_back(only_t);
   }
-  if (!robot_->set_target_joint_mit(p, v, kp, kd, t)) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("hardware_bridge"), "Failed to set target joint torque on write");
-    // return hardware_interface::return_type::ERROR;
+  if (pvt_ctrl_) {
+    if (!robot_->set_target_joint_mit(p, v, kp, kd, t)) {
+      RCLCPP_ERROR(rclcpp::get_logger("hardware_bridge"), "Failed to set target PVT on write");
+      // return hardware_interface::return_type::ERROR;
+    }
+  } else {
+    if (!robot_->set_target_joint_t(only_ts)) {
+      RCLCPP_ERROR(rclcpp::get_logger("hardware_bridge"), "Failed to set target T on write");
+      // return hardware_interface::return_type::ERROR;
+    }
   }
 
   return hardware_interface::return_type::OK;
