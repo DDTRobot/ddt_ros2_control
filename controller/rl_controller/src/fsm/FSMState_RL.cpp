@@ -84,26 +84,38 @@ void FSMState_RL::run()
   for (auto i : _data->params->wheel_indices) {
     pos[i] = .0f;
   }
-
   // compute command
   std::vector<tensor_element_t> torques;
   for (int i = 0; i < rl_params_->num_actions; i++) {
     tensor_element_t action_scaled = action_vec_[i] * rl_params_->action_scales[i];
-    // printf("sad%f" , rl_params_->action_scales[i]);
-    // tensor_element_t torque = 0.0;
     if (rl_params_->control_type == "P") {
       bool is_wheel_joint =
         std::find(_data->params->wheel_indices.begin(), _data->params->wheel_indices.end(), i) !=
         _data->params->wheel_indices.end();
       tensor_element_t command =
         action_scaled + (tensor_element_t)rl_params_->default_joint_angles[i];
+
+      static scalar_t pos_real;
+      if (is_wheel_joint) {
+          scalar_t cmd_vx = _data->rc_data->twist_linear[point::X];
+          bool is_stop = std::abs(cmd_vx) < 0.01; 
+          if (is_stop) {
+            pos_real -= vel[i] *0.002;
+          }
+          else
+          {
+            pos_real = 0;
+          }
+      }
+
       _data->low_cmd->kp(i) = is_wheel_joint ? 0.0 : rl_params_->joint_kp[i];
       _data->low_cmd->kd(i) = is_wheel_joint ? 0.0 : rl_params_->joint_kd[i];
       _data->low_cmd->qd(i) = is_wheel_joint ? 0.0 : command;
       _data->low_cmd->qd_dot(i) = 0.0;
       _data->low_cmd->tau_cmd(i) =
-        is_wheel_joint ? rl_params_->joint_kp[i] * command - rl_params_->joint_kd[i] * vel[i] : 0.0;
-    } else if (rl_params_->control_type == "P_V") {
+    is_wheel_joint ? rl_params_->joint_kp[i] * command + pos_real - rl_params_->joint_kd[i] * vel[i] : 0.0;
+    } 
+    else if (rl_params_->control_type == "P_V") {
       bool is_wheel_joint =
         std::find(_data->params->wheel_indices.begin(), _data->params->wheel_indices.end(), i) !=
         _data->params->wheel_indices.end();
@@ -114,13 +126,12 @@ void FSMState_RL::run()
       _data->low_cmd->qd(i) = is_wheel_joint ? 0.0 : command;
       _data->low_cmd->qd_dot(i) = is_wheel_joint ? action_scaled : 0.0;
       _data->low_cmd->tau_cmd(i) = 0.0;
+
+        std::cout << "out: "<< std::endl;
     } else {
       throw std::runtime_error("[FSMState_RL] Unknown control type");
     }
-    // torque *= rl_params_->output_torque_scale;
-    // torques.push_back(torque);
   }
-  // _data->low_cmd->tau_cmd = f2d(vectorToEigen(torques));
 }
 
 void FSMState_RL::exit()
