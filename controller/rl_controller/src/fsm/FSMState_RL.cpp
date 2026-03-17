@@ -192,6 +192,41 @@ void FSMState_RL::update_observations()
   // command
   for (size_t i = 0; i < rl_params_->commands_name.size(); i++) {
     scalar_t command;
+
+    static scalar_t aim_yaw,keep_yaw_i;
+    scalar_t min_trun_display = 0.0f,yaw_keep_display,yaw_error;
+
+      if(fabs(_data->rc_data->twist_angular[point::Z])>0.1f)
+      {
+        aim_yaw =  this->_data->low_state->yaw;
+        yaw_keep_display = 0;
+        keep_yaw_i = 0;
+
+        if(_data->rc_data->twist_angular[point::Z]>0.1f)
+        {
+          min_trun_display =  0.4f;
+        }
+        else if(_data->rc_data->twist_angular[point::Z]<-0.1f)
+        {
+          min_trun_display = -0.4f;
+        }
+
+      }
+      else
+      {
+        yaw_error = aim_yaw - this->_data->low_state->yaw;
+        while (yaw_error > M_PI) yaw_error -= 2 * M_PI;
+        while (yaw_error < -M_PI) yaw_error += 2 * M_PI;
+
+        keep_yaw_i += yaw_error * 0.002;
+
+        scalar_t max_i_output = 1.0f;
+        if (keep_yaw_i > max_i_output) keep_yaw_i = max_i_output;
+        if (keep_yaw_i < -max_i_output) keep_yaw_i = -max_i_output;
+
+        yaw_keep_display = 3.2f*yaw_error + keep_yaw_i;
+      }
+
     if (rl_params_->commands_name[i] == "lin_vel_x") {
       command = rl_params_->commands_gain[i] * _data->rc_data->twist_linear[point::X] +
                 rl_params_->commands_comp[i];
@@ -199,7 +234,9 @@ void FSMState_RL::update_observations()
       command = rl_params_->commands_gain[i] * _data->rc_data->twist_linear[point::Y] +
                 rl_params_->commands_comp[i];
     } else if (rl_params_->commands_name[i] == "ang_vel_z") {
-      command = rl_params_->commands_gain[i] * _data->rc_data->twist_angular[point::Z] +
+        yaw_keep_display = 4*(aim_yaw - this->_data->low_state->yaw);
+      command = rl_params_->commands_gain[i] * _data->rc_data->twist_angular[point::Z] + 
+                min_trun_display + yaw_keep_display+
                 rl_params_->commands_comp[i];
     } else if (rl_params_->commands_name[i] == "base_height") {
       command = rl_params_->commands_gain[i] * _data->rc_data->pose_position[point::Z] +
@@ -267,16 +304,7 @@ void FSMState_RL::update_observations()
     obs_vec_.segment(offset, obs.size()) = obs;
     offset += obs.size();
   }
-  // // clang-format off
-  // obs_vec_ << obs_.ang_vel * rl_params_->ang_vel_scale,
-  //             obs_.gravity,
-  //             obs_.commands,
-  //             pos * rl_params_->dof_pos_scale,
-  //             vel * rl_params_->dof_vel_scale,
-  //             obs_.last_actions;
-  // // clang-format on
 }
-
 void FSMState_RL::update_forward()
 {
   const long long interval = static_cast<long long>(rl_params_->time_interval * 1000000);
