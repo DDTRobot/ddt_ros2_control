@@ -1,3 +1,11 @@
+/*
+ * @Author: blank1 448913821@qq.com
+ * @Date: 2026-03-11 15:09:42
+ * @LastEditors: blank1 448913821@qq.com
+ * @LastEditTime: 2026-03-19 16:59:25
+ * @FilePath: \ddt_ros2_control\controller\rl_controller\include\rl_controller\common\enumClass.h
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 // Copyright (c) 2023 Direct Drive Technology Co., Ltd. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,6 +74,7 @@ struct LowlevelState
   Vec3<scalar_t> gyro;
   Quat<scalar_t> quat;
   DVec<scalar_t> q, dq, tau_est;
+  scalar_t yaw;
 };
 
 struct RemoteControlData
