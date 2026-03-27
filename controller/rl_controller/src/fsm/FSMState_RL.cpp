@@ -84,26 +84,40 @@ void FSMState_RL::run()
   for (auto i : _data->params->wheel_indices) {
     pos[i] = .0f;
   }
-
   // compute command
   std::vector<tensor_element_t> torques;
   for (int i = 0; i < rl_params_->num_actions; i++) {
     tensor_element_t action_scaled = action_vec_[i] * rl_params_->action_scales[i];
-    // printf("sad%f" , rl_params_->action_scales[i]);
-    // tensor_element_t torque = 0.0;
     if (rl_params_->control_type == "P") {
       bool is_wheel_joint =
         std::find(_data->params->wheel_indices.begin(), _data->params->wheel_indices.end(), i) !=
         _data->params->wheel_indices.end();
       tensor_element_t command =
         action_scaled + (tensor_element_t)rl_params_->default_joint_angles[i];
+
+      // Vec3<scalar_t> gyro_use = this->_data->low_state->gyro;
+
+      static scalar_t pos_real;
+      if (is_wheel_joint) {
+          scalar_t cmd_vx = _data->rc_data->twist_linear[point::X];
+          bool is_stop = std::abs(cmd_vx) < 0.01; 
+          if (is_stop) {
+            pos_real -= vel[i] *0.002;
+          }
+          else
+          {
+            pos_real = 0;
+          }
+      }
+
       _data->low_cmd->kp(i) = is_wheel_joint ? 0.0 : rl_params_->joint_kp[i];
       _data->low_cmd->kd(i) = is_wheel_joint ? 0.0 : rl_params_->joint_kd[i];
       _data->low_cmd->qd(i) = is_wheel_joint ? 0.0 : command;
       _data->low_cmd->qd_dot(i) = 0.0;
       _data->low_cmd->tau_cmd(i) =
-        is_wheel_joint ? rl_params_->joint_kp[i] * command - rl_params_->joint_kd[i] * vel[i] : 0.0;
-    } else if (rl_params_->control_type == "P_V") {
+    is_wheel_joint ? rl_params_->joint_kp[i] * command + pos_real - rl_params_->joint_kd[i] * vel[i]: 0.0;
+    } 
+    else if (rl_params_->control_type == "P_V") {
       bool is_wheel_joint =
         std::find(_data->params->wheel_indices.begin(), _data->params->wheel_indices.end(), i) !=
         _data->params->wheel_indices.end();
@@ -114,13 +128,12 @@ void FSMState_RL::run()
       _data->low_cmd->qd(i) = is_wheel_joint ? 0.0 : command;
       _data->low_cmd->qd_dot(i) = is_wheel_joint ? action_scaled : 0.0;
       _data->low_cmd->tau_cmd(i) = 0.0;
+
+        std::cout << "out: "<< std::endl;
     } else {
       throw std::runtime_error("[FSMState_RL] Unknown control type");
     }
-    // torque *= rl_params_->output_torque_scale;
-    // torques.push_back(torque);
   }
-  // _data->low_cmd->tau_cmd = f2d(vectorToEigen(torques));
 }
 
 void FSMState_RL::exit()
@@ -145,9 +158,6 @@ std::string FSMState_RL::checkTransition()
     }
   } else if (desiredState == "transform_down") {
     this->_nextStateName = "transform_down";
-    // } else if (desiredState == "idle") {
-    //   // normal c
-    //   this->_nextStateName = "idle";
   }
   return this->_nextStateName;
 }
@@ -181,6 +191,50 @@ void FSMState_RL::update_observations()
   // command
   for (size_t i = 0; i < rl_params_->commands_name.size(); i++) {
     scalar_t command;
+
+    static scalar_t aim_yaw,keep_yaw_i;
+    scalar_t min_trun_display = 0.0f,yaw_keep_display,yaw_error;
+
+  static int init_aim;
+    if(init_aim==0)
+    {
+      aim_yaw =  this->_data->low_state->yaw;
+      init_aim = 1;
+    }
+
+      if(fabs(_data->rc_data->twist_angular[point::Z])>0.1f)
+      {
+        aim_yaw =  this->_data->low_state->yaw;
+        yaw_keep_display = 0;
+        keep_yaw_i = 0;
+
+        if(_data->rc_data->twist_angular[point::Z]>0.1f)
+        {
+          min_trun_display =  0.4f;
+        }
+        else if(_data->rc_data->twist_angular[point::Z]<-0.1f)
+        {
+          min_trun_display = -0.4f;
+        }
+
+      }
+      else
+      {
+        yaw_error = aim_yaw - this->_data->low_state->yaw;
+        while (yaw_error > M_PI) yaw_error -= 2 * M_PI;
+        while (yaw_error < -M_PI) yaw_error += 2 * M_PI;
+
+        keep_yaw_i += yaw_error * 0.005;
+
+        scalar_t max_i_output = 15.0f;
+        if (keep_yaw_i > max_i_output) keep_yaw_i = max_i_output;
+        if (keep_yaw_i < -max_i_output) keep_yaw_i = -max_i_output;
+
+        // scalar_t speed_display = _data->rc_data->twist_linear[point::X]*0.3;
+
+        yaw_keep_display = 15.4f*yaw_error + keep_yaw_i;// + speed_display;
+      }
+
     if (rl_params_->commands_name[i] == "lin_vel_x") {
       command = rl_params_->commands_gain[i] * _data->rc_data->twist_linear[point::X] +
                 rl_params_->commands_comp[i];
@@ -188,7 +242,8 @@ void FSMState_RL::update_observations()
       command = rl_params_->commands_gain[i] * _data->rc_data->twist_linear[point::Y] +
                 rl_params_->commands_comp[i];
     } else if (rl_params_->commands_name[i] == "ang_vel_z") {
-      command = rl_params_->commands_gain[i] * _data->rc_data->twist_angular[point::Z] +
+      command = rl_params_->commands_gain[i] * _data->rc_data->twist_angular[point::Z] + 
+                 yaw_keep_display+
                 rl_params_->commands_comp[i];
     } else if (rl_params_->commands_name[i] == "base_height") {
       command = rl_params_->commands_gain[i] * _data->rc_data->pose_position[point::Z] +
@@ -256,14 +311,6 @@ void FSMState_RL::update_observations()
     obs_vec_.segment(offset, obs.size()) = obs;
     offset += obs.size();
   }
-  // // clang-format off
-  // obs_vec_ << obs_.ang_vel * rl_params_->ang_vel_scale,
-  //             obs_.gravity,
-  //             obs_.commands,
-  //             pos * rl_params_->dof_pos_scale,
-  //             vel * rl_params_->dof_vel_scale,
-  //             obs_.last_actions;
-  // // clang-format on
 }
 
 void FSMState_RL::update_forward()

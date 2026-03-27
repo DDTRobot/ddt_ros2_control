@@ -66,6 +66,7 @@ struct LowlevelState
   Vec3<scalar_t> gyro;
   Quat<scalar_t> quat;
   DVec<scalar_t> q, dq, tau_est;
+  scalar_t yaw;
 };
 
 struct RemoteControlData
