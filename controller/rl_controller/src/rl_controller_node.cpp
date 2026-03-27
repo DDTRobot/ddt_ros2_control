@@ -130,14 +130,18 @@ controller_interface::return_type RlController::update(
   state->quat = Quat<scalar_t>(
     imu_sensor_->get_orientation()[3], imu_sensor_->get_orientation()[0],
     imu_sensor_->get_orientation()[1], imu_sensor_->get_orientation()[2]);
-  // clang-format on
-  scalar_t qw = imu_sensor_->get_orientation()[3];
-  scalar_t qx = imu_sensor_->get_orientation()[0];
-  scalar_t qy = imu_sensor_->get_orientation()[1];
-  scalar_t qz = imu_sensor_->get_orientation()[2];
+
+scalar_t qw = imu_sensor_->get_orientation()[3];
+scalar_t qx = imu_sensor_->get_orientation()[0];
+scalar_t qy = imu_sensor_->get_orientation()[1];
+scalar_t qz = imu_sensor_->get_orientation()[2];
 
 state->yaw  = atan2(2.0 * (qw * qz + qx * qy),
                      1.0 - 2.0 * (qy * qy + qz * qz));
+
+// std::cout << "Current Yaw: " << yaw << " rad (" << yaw * 180/M_PI << "°)" << std::endl;
+
+  // clang-format on
   // Control Update
   FSMController_->run();
   // Update torque
