@@ -95,8 +95,6 @@ void FSMState_RL::run()
       tensor_element_t command =
         action_scaled + (tensor_element_t)rl_params_->default_joint_angles[i];
 
-      // Vec3<scalar_t> gyro_use = this->_data->low_state->gyro;
-
       static scalar_t pos_real;
       if (is_wheel_joint) {
           scalar_t cmd_vx = _data->rc_data->twist_linear[point::X];
@@ -115,7 +113,7 @@ void FSMState_RL::run()
       _data->low_cmd->qd(i) = is_wheel_joint ? 0.0 : command;
       _data->low_cmd->qd_dot(i) = 0.0;
       _data->low_cmd->tau_cmd(i) =
-    is_wheel_joint ? rl_params_->joint_kp[i] * command + pos_real - rl_params_->joint_kd[i] * vel[i]: 0.0;
+    is_wheel_joint ? rl_params_->joint_kp[i] * command - rl_params_->joint_kd[i] * vel[i]: 0.0;
     } 
     else if (rl_params_->control_type == "P_V") {
       bool is_wheel_joint =
@@ -202,6 +200,24 @@ void FSMState_RL::update_observations()
       init_aim = 1;
     }
 
+      bool is_wheel_joint =
+        std::find(_data->params->wheel_indices.begin(), _data->params->wheel_indices.end(), i) !=
+        _data->params->wheel_indices.end();
+
+      static scalar_t pos_real;
+  DVec<tensor_element_t> vel = d2f(_data->low_state->dq);
+      if (is_wheel_joint) {
+          scalar_t cmd_vx = _data->rc_data->twist_linear[point::X];
+          bool is_stop = std::abs(cmd_vx) < 0.01; 
+          if (is_stop) {
+            pos_real -= vel[i] *0.003;
+          }
+          else
+          {
+            pos_real = 0;
+          }
+      }
+
       if(fabs(_data->rc_data->twist_angular[point::Z])>0.1f)
       {
         aim_yaw =  this->_data->low_state->yaw;
@@ -230,13 +246,12 @@ void FSMState_RL::update_observations()
         if (keep_yaw_i > max_i_output) keep_yaw_i = max_i_output;
         if (keep_yaw_i < -max_i_output) keep_yaw_i = -max_i_output;
 
-        // scalar_t speed_display = _data->rc_data->twist_linear[point::X]*0.3;
 
-        yaw_keep_display = 15.4f*yaw_error + keep_yaw_i;// + speed_display;
+        yaw_keep_display = 15.4f*yaw_error + keep_yaw_i;
       }
 
     if (rl_params_->commands_name[i] == "lin_vel_x") {
-      command = rl_params_->commands_gain[i] * _data->rc_data->twist_linear[point::X] +
+      command = rl_params_->commands_gain[i] * _data->rc_data->twist_linear[point::X] + pos_real +
                 rl_params_->commands_comp[i];
     } else if (rl_params_->commands_name[i] == "lin_vel_y") {
       command = rl_params_->commands_gain[i] * _data->rc_data->twist_linear[point::Y] +
