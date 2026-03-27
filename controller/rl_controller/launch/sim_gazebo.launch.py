@@ -66,10 +66,14 @@ def launch_setup(context, *args, **kwargs):
     robot_description = xacro.process_file(
         robot_xacro_path, mappings={"hw_env": "gazebo"}
     ).toxml()
-    robot_description = robot_description.replace(
-        "package://" + robot_name + "_description",
-        "file://" + get_package_share_directory(robot_name + "_description"),
-    )
+
+    # Replace package:// URIs for all *_description packages
+    description_packages = ["d1_description", "d1h_description", "tita_description", "titatit_description"]
+    for desc_pkg in description_packages:
+        robot_description = robot_description.replace(
+            "package://" + desc_pkg,
+            "file://" + get_package_share_directory(desc_pkg),
+        )
 
     robot_description = robot_description.replace(
         get_package_share_directory("gazebo_bridge")+ "/config/controllers.yaml",
