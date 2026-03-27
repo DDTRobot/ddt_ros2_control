@@ -95,6 +95,8 @@ void FSMState_RL::run()
       tensor_element_t command =
         action_scaled + (tensor_element_t)rl_params_->default_joint_angles[i];
 
+      // Vec3<scalar_t> gyro_use = this->_data->low_state->gyro;
+
       static scalar_t pos_real;
       if (is_wheel_joint) {
           scalar_t cmd_vx = _data->rc_data->twist_linear[point::X];
