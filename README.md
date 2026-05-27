@@ -17,6 +17,19 @@
 - `ros_utils`: 主要为`ros`话题名称相关
 - `urdfs`：机器人模型描述文件（`URDF`/`XACRO`/`Mujoco`等）
 
+## 注意事项
+在使用hardware之前，请检查当前d1-ros2 软件版本,使用`dpkg -l d1-ros2`指令检查，如果当前软件版本为4月01号的，则使用`compress_v1`分支代码，切记勿使用`main`分支，否则失控，同时使用前注意安全。以下`compress_v1`分支使用方法：
+```bash
+git clone https://github.com/DDTRobot/ddt_ros2_control/tree/compress_v1
+cd ddt_ros2_control
+#在编译hardware_bridge前，source /opt/d1-ros2/setup.bash
+source /opt/d1_ros2/setup.bash 
+#确保前后机无其他ros2节点在运行，然后启动硬件运控服务
+colcon build --symlink-install --packages-up-to rl_controller hardware_bridge
+sudo systemctl stop d1_bringup.service
+ros2 launch rl_controller hw.launch.py robot:=d1
+
+```
 ## 环境与依赖
 - 安装onnx推理引擎
 ``` bash 
@@ -50,7 +63,6 @@ sudo apt install ros-humble-gazebo-ros ros-humble-gazebo-ros2-control
 mkdir -p ~/ddt_ros2_ws && cd ~/ddt_ros2_ws
 # 将本仓库放置于 ~/ddt_ros2_ws/
 mv ddt_ros2 src
-
 # 如需使用mujoco，执行下方
 git clone -b 3.3.0 https://github.com/google-deepmind/mujoco.git
 # 构建
@@ -78,7 +90,8 @@ ros2 launch rl_controller sim_gazebo.launch.py robot:=d1h # d1暂时加载不出
 ```
 - Mujoco 仿真：
 在仿真`d1`时，需要手动将`d1h_description`中的`meshes`复制到`d1_description`中，并且修改`d1_description/CMakeLists.txt`中，将meshes注释取消。然后重新编译d1_description
-```bash
+```bashros2 launch rl_controller hw.launch.py robot:=d1
+
 ros2 launch rl_controller sim_mujoco.launch.py robot:=d1
 ```
 
@@ -96,9 +109,7 @@ colcon build --symlink-install --packages-up-to rl_controller hardware_bridge
 - 启动控制器（硬件环境）：
 在启动有硬件环境的机器上，需要手动关闭已经启动的运控服务：
 ```bash
-sudo systemctl stop joy_controller.service
-sudo systemctl stop rl8_controller.service
-sudo systemctl stop rl16_controller.service
+sudo systemctl stop d1_bringup.service 
 ```
 
 **如果运行在TITA上，需要注意：**
