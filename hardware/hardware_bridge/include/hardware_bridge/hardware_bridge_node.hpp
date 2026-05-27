@@ -30,7 +30,7 @@
 #include "rclcpp/macros.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/imu.hpp"
-#include "tita_robot/tita_robot.hpp"
+#include "canfd_api/canfd_api.hpp"
 
 namespace tita_locomotion
 {
@@ -41,7 +41,7 @@ struct Joint
   double velocity = 0.0f;
   double effort = 0.0f;
   double errorId = 0.0f;
-
+  
   double effortCommand = 0.0f;
   double positionCommand = 0.0f;
   double velocityCommand = 0.0f;
@@ -61,8 +61,6 @@ struct InertiaUnit
 class HardwareBridge : public hardware_interface::SystemInterface
 {
 public:
-  HardwareBridge();
-  ~HardwareBridge();
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_init(
     const hardware_interface::HardwareInfo & info) override;
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(
@@ -78,16 +76,13 @@ public:
     const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) override;
 
 private:
-  // rclcpp::Node::SharedPtr node_;
-  // rclcpp::executors::SingleThreadedExecutor executor_;
   std::vector<Joint> mJoints;
   InertiaUnit mImu;
   size_t leg_dof_{4};
 
-private:
-  std::unique_ptr<tita_robot> robot_;
+  std::unique_ptr<can_device::CanfdApi> canfd_api_;
+
   rclcpp::Clock clock_{RCL_SYSTEM_TIME};
-  bool pvt_ctrl_{true};
 };
 }  // namespace tita_locomotion
 

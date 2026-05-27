@@ -21,18 +21,6 @@
 
 namespace tita_locomotion
 {
-HardwareBridge::HardwareBridge() {}
-HardwareBridge::~HardwareBridge()
-{
-  // if (direct_mode_) {
-  //   std::vector<double> cmd_torque;
-  //   cmd_torque.resize(mJoints.size(), 0);
-  //   if (!robot_->set_target_joint_t(cmd_torque)) {
-  //     RCLCPP_ERROR(
-  //       rclcpp::get_logger("hardware_bridge"), "Failed to set target joint torque on exit");
-  //   }
-  // }
-}
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn HardwareBridge::on_init(
   const hardware_interface::HardwareInfo & info)
@@ -42,12 +30,6 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
     hardware_interface::CallbackReturn::SUCCESS) {
     return hardware_interface::CallbackReturn::ERROR;
   }
-  // node_ = rclcpp::Node::make_shared("hardware_bridge_node");
-  // executor_.add_node(node_);
-  // std::thread([this]() { executor_.spin(); }).detach();
-  auto ctrl_mode = info_.hardware_parameters["pvt_ctrl"];
-  pvt_ctrl_ = ctrl_mode.compare("false") == 0 ? false : true;
-  RCLCPP_INFO(rclcpp::get_logger("hardware_bridge"), "Using PVT control: %d", pvt_ctrl_);
   for (hardware_interface::ComponentInfo component : info.joints) {
     Joint joint;
     joint.name = component.name;
@@ -58,8 +40,8 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
       mImu.name = component.name;
     }
   }
-
-  robot_ = std::make_unique<tita_robot>(mJoints.size());  // depends on urdf
+  canfd_api_ =
+    std::make_unique<can_device::CanfdApi>(mJoints.size(), 0, "can0");  // depends on urdf
   if (mJoints.size() % 8 == 0)
     leg_dof_ = 4;
   else if (mJoints.size() % 6 == 0)
@@ -144,74 +126,72 @@ HardwareBridge::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/
 hardware_interface::return_type HardwareBridge::read(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
-  if (robot_->imu_data_timeout()) {
-    RCLCPP_WARN_THROTTLE(
-      rclcpp::get_logger("hardware_bridge"), clock_, 10000,
-      "Imu data read timeout, waiting for connect");
-
-  } else if (robot_->motors_data_timeout()) {
-    RCLCPP_WARN_THROTTLE(
-      rclcpp::get_logger("hardware_bridge"), clock_, 10000,
-      "Motors data read timeout, waiting for connect");
-  }
-
-  // read from can bus
-  auto q = robot_->get_joint_q();
-  auto v = robot_->get_joint_v();
-  auto t = robot_->get_joint_t();
-  auto status = robot_->get_joint_status();
+  auto motors_in = canfd_api_->get_motors_in();
+  auto status = canfd_api_->get_motors_status();
+  // RCLCPP_INFO(rclcpp::get_logger("hardware_bridge"), "monotonictime: %lu, systemtime: %u", can_device::get_monotonic_time(), can_device::get_current_time());
   for (size_t id = 0; id < mJoints.size(); id++) {
-    mJoints[id].position = q[id];
-    mJoints[id].velocity = v[id];
-    mJoints[id].effort = t[id];
-    if (id % leg_dof_ == 1) {
-      if (mJoints[id].position < -2.5) {
-        mJoints[id].position += 2 * M_PI;
-      }
-    }
     mJoints[id].errorId = status[id];
+    mJoints[id].position = motors_in[id].position;
+    mJoints[id].velocity = motors_in[id].velocity;
+    mJoints[id].effort = motors_in[id].torque;
   }
-  auto quat = robot_->get_imu_quaternion();
-  auto accl = robot_->get_imu_acceleration();
-  auto gyro = robot_->get_imu_angular_velocity();
+  // for (size_t id = 0; id < mJoints.size(); id++) {
+  //   if (mJoints[id].errorId != 0x00) {
+  //     return hardware_interface::return_type::ERROR;
+  //   }
+  // }
 
+  auto imu_data = canfd_api_->get_imu_data();
+
+  if ((can_device::get_monotonic_time() - imu_data.timestamp) / 1.0e6 > 2 /*s*/) {
+    RCLCPP_ERROR_THROTTLE(
+      rclcpp::get_logger("hardware_bridge"), clock_, 10000,
+      "Imu data read timeout, imu time: %f s, current time: %f s", imu_data.timestamp / 1.0e6,
+      can_device::get_monotonic_time() / 1.0e6);
+    // return hardware_interface::return_type::ERROR;
+  }
   for (size_t id = 0; id < 3; id++) {
-    mImu.linear_acceleration[id] = accl[id];
-    mImu.angular_velocity[id] = gyro[id];
-    mImu.orientation[id] = quat[id];
+    mImu.linear_acceleration[id] = imu_data.accl[id];
+    mImu.angular_velocity[id] = imu_data.gyro[id];
+    mImu.orientation[id] = imu_data.quaternion[id];
   }
-
-  mImu.orientation[3] = quat[3];
+  mImu.orientation[3] = imu_data.quaternion[3];
   return hardware_interface::return_type::OK;
 }
 
 hardware_interface::return_type HardwareBridge::write(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
-  std::vector<double> kp, kd, p, v, t, only_ts;
-  for (size_t id = 0; id < mJoints.size(); id++) {
-    kp.push_back(mJoints[id].kp);
-    kd.push_back(mJoints[id].kd);
-    if (id % leg_dof_ == 1 && mJoints[id].positionCommand > M_PI) {
-      mJoints[id].positionCommand -= 2 * M_PI;
+  for (size_t leg_id = 0; leg_id < mJoints.size() / leg_dof_; leg_id++) {
+    std::vector<can_device::api_motor_out_t> motors(leg_dof_);
+    bool ok = true;
+    for (size_t id = 0; id < leg_dof_; id++) {
+      motors[id].kp = mJoints[id + leg_id * leg_dof_].kp;
+      motors[id].kd = mJoints[id + leg_id * leg_dof_].kd;
+      motors[id].position = mJoints[id + leg_id * leg_dof_].positionCommand;
+      motors[id].velocity = mJoints[id + leg_id * leg_dof_].velocityCommand;
+      motors[id].torque = mJoints[id + leg_id * leg_dof_].effortCommand;
+      ok &= (mJoints[id + leg_id * leg_dof_].errorId == 0);
     }
-    p.push_back(mJoints[id].positionCommand);
-    v.push_back(mJoints[id].velocityCommand);
-    t.push_back(mJoints[id].effortCommand);
-    auto only_t = mJoints[id].effortCommand +
-                  mJoints[id].kp * (mJoints[id].positionCommand - mJoints[id].position) +
-                  mJoints[id].kd * (mJoints[id].velocityCommand - mJoints[id].velocity);
-    only_ts.push_back(only_t);
-  }
-  if (pvt_ctrl_) {
-    if (!robot_->set_target_joint_mit(p, v, kp, kd, t)) {
-      RCLCPP_ERROR(rclcpp::get_logger("hardware_bridge"), "Failed to set target PVT on write");
-      // return hardware_interface::return_type::ERROR;
-    }
-  } else {
-    if (!robot_->set_target_joint_t(only_ts)) {
-      RCLCPP_ERROR(rclcpp::get_logger("hardware_bridge"), "Failed to set target T on write");
-      // return hardware_interface::return_type::ERROR;
+    if (ok) {
+      if (!canfd_api_->send_leg_motors_can(motors, leg_id)) {
+        // for (size_t id = 0; id < leg_dof_; id++) {
+        //   mJoints[id + leg_id * leg_dof_].errorId = 0x200;
+        // }
+        RCLCPP_ERROR(
+          rclcpp::get_logger("hardware_bridge"), "Failed to set target joint torque on write");
+        return hardware_interface::return_type::ERROR;
+      } else {
+        // for (size_t id = 0; id < leg_dof_; id++) {
+        //   if (mJoints[id + leg_id * leg_dof_].errorId == 0x200) {
+        //     mJoints[id + leg_id * leg_dof_].errorId = 0x00;  // clear send error
+        //   }
+        // }
+      }
+    } else {
+      RCLCPP_WARN_THROTTLE(
+        rclcpp::get_logger("hardware_bridge"), clock_, 10000,
+        "[write] Leg %ld has motor error, skip to send command", leg_id);
     }
   }
 
