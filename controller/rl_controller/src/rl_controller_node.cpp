@@ -421,6 +421,7 @@ void RlController::update_control_parameters()
     get_node()->get_parameter<scalar_t>(policy_name + ".episode_length", rl_params.episode_length);
     // control
     get_node()->get_parameter<scalar_t>(policy_name + ".time_interval", rl_params.time_interval);
+    get_node()->get_parameter<std::string>(policy_name + ".control_type", rl_params.control_type);
     get_node()->get_parameter<std::vector<scalar_t>>(
       policy_name + ".default_joint_angles", rl_params.default_joint_angles);
     get_node()->get_parameter<std::vector<scalar_t>>(policy_name + ".joint_kp", rl_params.joint_kp);
