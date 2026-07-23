@@ -1,5 +1,4 @@
 <?xml version="1.0"?>
-
 <robot name="d1h_description"
     xmlns:xacro="http://www.ros.org/wiki/xacro">
     <xacro:arg name="hw_env" default="none" />
@@ -8,8 +7,9 @@
     <xacro:ros2control hw_env="$(arg hw_env)" />
 
     <xacro:include filename="$(find d1h_description)/xacro/materials.xacro"/>
-    <xacro:include filename="$(find d1h_description)/xacro/single_robot.xacro"/>
-
+    <xacro:include filename="$(find d1h_description)/xacro/d1h_base.xacro"/>
+    
+    <!-- Robot Base link -->
     <link name="base_link">
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -23,6 +23,8 @@
             <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
         </inertial>
     </link>
+
+    <!-- Imu link -->
     <link name="imu_link">
         <inertial>
             <mass value="0.001"/>
@@ -43,10 +45,13 @@
             </geometry>
         </collision>
     </link>
+    
+    <!-- Imu Joint -->
     <joint name="imu_joint" type="fixed">
         <parent link="base_link"/>
         <child link="imu_link"/>
         <origin rpy="0 0 0" xyz="0 0 0"/>
     </joint>
-    <xacro:single_robot name="F" x_offset="0"/>
+
+    <xacro:d1h_base name="F" x_offset="0"/>
 </robot>
