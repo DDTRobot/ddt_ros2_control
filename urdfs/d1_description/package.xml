@@ -16,7 +16,7 @@
   <build_depend        condition="$ROS_VERSION == 2">rclcpp</build_depend>
   <build_export_depend condition="$ROS_VERSION == 2">rclcpp</build_export_depend>
   <exec_depend         condition="$ROS_VERSION == 2">rclcpp</exec_depend>
-
+  <depend>d1h_description</depend>
   <export>
     <build_type condition="$ROS_VERSION == 1">catkin</build_type>
     <build_type condition="$ROS_VERSION == 2">ament_cmake</build_type>
