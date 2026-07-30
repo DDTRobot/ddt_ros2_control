@@ -136,7 +136,7 @@
       <parent link="${name}_base_link"/>
       <child link="${name}L_hip"/>
       <axis xyz="1 0 0" />
-      <dynamics damping="0.2346" friction="0.943"/>
+      <dynamics damping="0.05" friction="0.15"/>
       <limit lower="-0.7854" upper="0.7854" effort="80" velocity="20" />
     </joint>
 
@@ -170,7 +170,7 @@
       <parent link="${name}L_hip" />
       <child link="${name}L_thigh" />
       <axis xyz="0 1 0" />
-      <dynamics damping="0.2346" friction="0.943"/>
+      <dynamics damping="0.05" friction="0.15"/>
       <limit lower="-1.8326" upper="3.4034" effort="80" velocity="20" />
     </joint>
 
@@ -204,7 +204,7 @@
       <parent link="${name}L_thigh" />
       <child link="${name}L_calf" />
       <axis xyz="0 1 0" />
-      <dynamics damping="0.2346" friction="0.943"/>
+      <dynamics damping="0.05" friction="0.15"/>
       <limit lower="-2.72" upper="-0.85" effort="80" velocity="20" />
     </joint>
 
@@ -238,7 +238,7 @@
       <parent link="${name}L_calf" />
       <child link="${name}L_foot" />
       <axis xyz="0 1 0" />
-      <dynamics damping="0.5" friction="0.0"/>
+      <dynamics damping="0.005" friction="0.02"/>
       <limit lower="-31415926" upper="31415926" effort="12" velocity="30" />
     </joint>
 
@@ -266,7 +266,7 @@
       <parent link="${name}_base_link" />
       <child link="${name}R_hip" />
       <axis xyz="1 0 0" />
-      <dynamics damping="0.2346" friction="0.943"/>
+      <dynamics damping="0.05" friction="0.15"/>
       <limit lower="-0.7854" upper="0.7854" effort="80" velocity="20" />
     </joint>
 
@@ -300,7 +300,7 @@
       <parent link="${name}R_hip" />
       <child link="${name}R_thigh" />
       <axis xyz="0 1 0" />
-      <dynamics damping="0.2346" friction="0.943"/>
+      <dynamics damping="0.05" friction="0.15"/>
       <limit lower="-1.8326" upper="3.4034" effort="80" velocity="20" />
     </joint>
 
@@ -334,7 +334,7 @@
       <parent link="${name}R_thigh" />
       <child link="${name}R_calf" />
       <axis xyz="0 1 0" />
-      <dynamics damping="0.2346" friction="0.943"/>
+      <dynamics damping="0.05" friction="0.15"/>
       <limit lower="-2.72" upper="-0.85" effort="80" velocity="20" />
     </joint>
 
@@ -368,7 +368,7 @@
       <parent link="${name}R_calf" />
       <child link="${name}R_foot" />
       <axis xyz="0 1 0" />
-      <dynamics damping="0.5" friction="0.0"/>
+      <dynamics damping="0.005" friction="0.02"/>
       <limit lower="-31415926" upper="31415926" effort="12" velocity="30" />
     </joint>
   </xacro:macro>
