@@ -9,6 +9,7 @@
 
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
+  <depend>angles</depend>
   <depend>gazebo_dev</depend>
   <depend>hardware_interface</depend>
   <depend>rclcpp</depend>
