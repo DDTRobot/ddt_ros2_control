@@ -1,62 +1,48 @@
 # DDT 机器人 sim2sim/sim2real
-本仓库是一个基于 ROS 2 的多包工作空间，包含机器人控制器、硬件桥接、仿真桥接（`Mujoco` / `Gazebo` / `Webots`）、交互控制以及机器人模型描述。控制器支持基于有限状态机的策略，并可加载 ONNX 强化学习模型进行推理。
-同时提供 [Docker 镜像与启动说明](./docker/README.md)，将依赖与配置固化为可复现环境，便于快速部署、复现实验与跨设备一致运行（sim2sim）。
+本仓库提供了 DDT 机器人 sim2sim 和部署，遥控的工具，通过 15 个 ROS 2 的包提供
+| 分类 | 数量 | 包名 |
+|---|---:|---|
+| `controller/` | 1 | `rl_controller` 基于`ros2_control`的强化学习控制器 |
+| `interaction/` | 5 | `gazebo_bridge`、`webots_bridge`、`mujoco_bridge`、`mujoco_ros2_control`、`mujoco_sim_ros2` |
+| `interaction` | 2 | `keyboard_controller` 键盘交互、`teleop_command` 遥控手柄交互 |
+| `ros_utils`/ | 1 | `ros_utils` 提供`ros`话题 |
+| `hardware/` | 2 | `hardware_bridge` 硬件桥接节点与启动文件、`tita_robot` 机器人硬件驱动 |
+| `urdfs/` | 4 | `d1_description`、`d1h_description`、`tita_description`、`titatit_description` 提供 `URDF`/`XACRO`/`Mujoco` 机器人模型描述 |
 
-## 主要功能
-- 强化学习控制器（支持 ONNX 推理），基于有限状态机组织控制逻辑
-- `ros2_control` 硬件桥接，连接真实机器人驱动库
-- `Mujoco` / `Gazebo` / `Webots` 三种仿真环境桥接与示例世界
-- 键盘控制与遥控（ELRS）交互模块
-- 多机器人模型与描述（`tita`、`d1`(四轮足)、`d1h`(双轮足)）
+使用这些 ROS 2 包可快速进行 sim2sim 和控制策略真机部署。
 
-## 目录结构
-- `controller/rl_controller`：基于`ros2_control`框架强化学习控制器
-- `hardware`：`hardware_bridge`为`ros2_control` 硬件桥接节点与启动文件，`tita_robot`真实机器人底层驱动接口
-- `interaction`：`keyboard_controller`键盘交互节点，`teleop_command`遥控手柄交互节点
-- `simulation`：`Mujoco`、`Gazebo`、`Webots` 仿真桥接
-- `ros_utils`: 主要为`ros`话题名称相关
-- `urdfs`：机器人模型描述文件（`URDF`/`XACRO`/`Mujoco`等）
-  
-## 注意事项
-在使用hardware之前，请检查当前d1-ros2 软件版本,使用`dpkg -l d1-ros2`指令检查，如果当前软件版本为4月01号的，则使用`compress_v1`分支代码，切记勿使用`main`分支，否则失控，同时使用前注意安全。以下`compress_v1`分支使用方法：
+## 环境依赖
+
+- 系统：Ubuntu 22.04 可以使用我们提供的 [Docker 镜像](./docker/README.md) 。
+- 安装  ros2 humble 并安装
 ```bash
-git clone https://github.com/DDTRobot/ddt_ros2_control/tree/compress_v1
-cd ddt_ros2_control
-#在编译hardware_bridge前，source /opt/d1-ros2/setup.bash
-source /opt/d1_ros2/setup.bash 
-#确保前后机无其他ros2节点在运行，然后启动硬件运控服务
-colcon build --symlink-install --packages-up-to rl_controller hardware_bridge
-sudo systemctl stop d1_bringup.service
-ros2 launch rl_controller hw.launch.py robot:=d1
+sudo apt install ros-humble-ros2-control ros-humble-ros2-controllers
 ```
-## 环境与依赖
-- 安装onnx推理引擎
+- 按需安装仿真环境
+  1. `webots`
+  ```bash
+  sudo apt install ros-humble-webots-ros2 ros-humble-webots-ros2-control
+  ```
+  1. `gazebo`
+  ```bash
+  sudo apt install ros-humble-gazebo-ros ros-humble-gazebo-ros2-control
+  ```
+  1. `mujoco`: 在工作空间中
+  ```bash
+  git clone -b 3.3.0 https://github.com/google-deepmind/mujoco.git
+  ```
+
+- 要使用 RL 控制器，则安装onnx推理引擎
 ``` bash 
-# 根据你的系统架构选择x64或者aarch64
+ # 根据你的系统架构选择x64或者aarch64
 wget https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-linux-x64-1.10.0.tgz
 tar xvf onnxruntime-linux-x64-1.10.0.tgz
 sudo cp -a onnxruntime-linux-x64-1.10.0/include/* /usr/include
 sudo cp -a onnxruntime-linux-x64-1.10.0/lib/* /usr/lib
 ```
-- Ubuntu 22.04, ros2 humble, gazebo classic, webots R2025a
-安装好ros2 humble后，安装以下依赖：
-```bash
-sudo apt install ros-humble-ros2-control ros-humble-ros2-controllers
-```
-- 根据需要安装仿真环境所需的依赖
-1. `webots`
-```bash
-sudo apt install ros-humble-webots-ros2 ros-humble-webots-ros2-control
-```
-2. `gazebo`
-```bash
-sudo apt install ros-humble-gazebo-ros ros-humble-gazebo-ros2-control
-```
-3. `mujoco`
-见下方构建部分
 
 ## 构建
-以下命令展示了所有可行的编译命令，根据你的实际需要选择必要的组件进行编译。
+按需编译组件
 ```bash
 # 创建并进入工作空间
 mkdir -p ~/ddt_ros2_ws && cd ~/ddt_ros2_ws
@@ -74,11 +60,17 @@ colcon build --symlink-install --packages-up-to webots_bridge # 可替换为gaze
 colcon build --symlink-install --packages-up-to d1_description d1h_description
 # 编译硬件桥接
 colcon build --symlink-install --packages-up-to hardware_bridge
-# 载入环境
-source install/setup.bash
 ```
 
+
 ## 仿真运行
+> 在运行所有 `ros2` 命令前都需要载入环境
+> ```bash
+> # 在工作空间路径下
+> source install/setup.bash
+> ```
+
+开启仿真环境后，可进行[交互控制](#交互控制)
 - Webots 仿真（地形可选 `empty_world`、`stairs`、`uneven`）：
 ```bash
 ros2 launch rl_controller sim_webots.launch.py robot:=d1 terrain:=empty_world
@@ -93,17 +85,55 @@ ros2 launch rl_controller sim_gazebo.launch.py robot:=d1h # d1暂时加载不出
 ros2 launch rl_controller sim_mujoco.launch.py robot:=d1
 ```
 
+## 交互控制
+用于键盘控制与遥控（ELRS）交互。
+
+编译下述功能包
+```bash
+colcon build --symlink-install --packages-up-to teleop_command keyboard_controller 
+```
+
+- 键盘控制：
+```bash
+source install/setup.bash
+ros2 run keyboard_controller keyboard_controller_node
+```
+先按 `7` 进入 `transform_up` 等待 2 秒左右，让机器人站起，然后按 `0` 切换到我们提供的 RL 控制器。
+
+- 遥控（ELRS）：
+```bash
+source install/setup.bash
+ros2 launch teleop_command teleop_command.launch.py
+```
+
+
 ## 硬件运行
-硬件桥接依赖真实机器人驱动库（见 `hardware/tita_robot/lib/*/libtita_robot.so`）。需要将代码拷贝在机器上，需要配置硬件编译需要的环境，例如`colcon`后，再进行编译。
+硬件桥接依赖真实机器人驱动库（见 `hardware/tita_robot/lib/*/libtita_robot.so`）。需要将代码拷贝在机器上
 ```bash
 sudo apt install python3-colcon-common-extensions
 ```
-编译运行在硬件上运行运动控制必要的包
+编译
 ```bash
 colcon build --symlink-install --packages-up-to rl_controller hardware_bridge
 ```
+**注意事项**
+在使用 `hardware/` 之前，请检查当前 `d1-ros2` 软件版本
+```
+dpkg -l d1-ros2
+```
+如果当前软件版本为4月01号，则使用`compress_v1`分支代码，切忌使用`main`分支，否则**失控**，务必**注意安全**。
 
-
+以下`compress_v1`分支使用方法：
+```bash
+git clone https://github.com/DDTRobot/ddt_ros2_control/tree/compress_v1
+cd ddt_ros2_control
+#在编译hardware_bridge前，source /opt/d1-ros2/setup.bash
+source /opt/d1_ros2/setup.bash 
+#确保前后机无其他ros2节点在运行，然后启动硬件运控服务
+colcon build --symlink-install --packages-up-to rl_controller hardware_bridge
+sudo systemctl stop d1_bringup.service
+ros2 launch rl_controller hw.launch.py robot:=d1
+```
 - 启动控制器（硬件环境）：
 在启动有硬件环境的机器上，需要手动关闭已经启动的运控服务：
 ```bash
@@ -112,29 +142,12 @@ sudo systemctl stop d1_bringup.service
 
 **如果运行在TITA上，需要注意：**
 
-TITA上电后运控板默认进入Ready Mode，需要运行此[start.bash](./start.bash)，让运控板进入 Direct mode
+TITA上电后运控板默认进入Ready Mode，需要运行此[start.bash](./start.bash)，让运控板进入 Direct Mode
 
 
 确保无其他ros2节点在运行，然后启动硬件运控服务：
 ```bash
 ros2 launch rl_controller hw.launch.py robot:=d1
-```
-
-## 交互控制
-需编译下述功能包来启用键盘控制与遥控（ELRS）交互模块
-```bash
-colcon build --symlink-install --packages-up-to teleop_command keyboard_controller 
-source install/setup.bash
-```
-
-- 键盘控制：
-```bash
-ros2 run keyboard_controller keyboard_controller_node
-```
-
-- 遥控（ELRS）：
-```bash
-ros2 launch teleop_command teleop_command.launch.py
 ```
 
 ## 控制器配置与模型
@@ -147,7 +160,7 @@ ros2 launch teleop_command teleop_command.launch.py
 - 状态机接口与实现：`controller/rl_controller/include/rl_controller/fsm/*` 与 `src/fsm/*`
 
 
-## 诊断与常见问题
+## 常见问题
 - Webots未找到：  的安装路径要在环境变量中，例如：
 ```bash
 export WEBOTS_HOME=/usr/lib/webots
