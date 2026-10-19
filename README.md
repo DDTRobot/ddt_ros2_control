@@ -107,12 +107,17 @@ ros2 launch teleop_command teleop_command.launch.py
 ```
 
 
-## 硬件运行
-硬件桥接依赖真实机器人驱动库（见 `hardware/tita_robot/lib/*/libtita_robot.so`）。需要将代码拷贝在机器上
+## 实机部署
+
+所需文件在 `hardware/` 文件夹下。 
+
+### D1
+
+安装依赖
 ```bash
 sudo apt install python3-colcon-common-extensions
 ```
-编译
+需要将代码拷贝在机器上，并编译
 ```bash
 colcon build --symlink-install --packages-up-to rl_controller hardware_bridge
 ```
@@ -140,15 +145,15 @@ ros2 launch rl_controller hw.launch.py robot:=d1
 sudo systemctl stop d1_bringup.service
 ```
 
-**如果运行在TITA上，需要注意：**
-
-TITA上电后运控板默认进入Ready Mode，需要运行此[start.bash](./start.bash)，让运控板进入 Direct Mode
-
-
 确保无其他ros2节点在运行，然后启动硬件运控服务：
 ```bash
 ros2 launch rl_controller hw.launch.py robot:=d1
 ```
+
+### TITA
+
+TITA 的实机部署指引见 `hardware/tita_robot/docs/`。
+
 
 ## 控制器配置与模型
 - 控制器参数与模型位于：
