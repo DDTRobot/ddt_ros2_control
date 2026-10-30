@@ -93,8 +93,8 @@ void FSM::run()
   }
   // limit torque out put
   for (Eigen::Index i = 0; i < _data->low_cmd->tau_cmd.size(); i++) {
-    std::clamp(
-      _data->low_cmd->tau_cmd[i], _data->params->torque_limit[i], -_data->params->torque_limit[i]);
+    _data->low_cmd->tau_cmd[i] = std::clamp(
+      _data->low_cmd->tau_cmd[i], -_data->params->torque_limit[i], _data->params->torque_limit[i]);
   }
 
   count++;
